@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>School Project Cover</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Amaranth', sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .box {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 400px;
+            margin: 10px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        h2 { color: #ff9800; margin-top: 0; margin-bottom: 20px;}
+        .field { text-align: left; margin-bottom: 15px; }
+        label { color: #ccc; font-size: 13px; font-weight: bold; display: block; margin-bottom: 5px; }
+
+        input, select {
+            width: 100%; padding: 12px;
+            border: 2px solid #444; border-radius: 8px;
+            background: #2c2c2c; color: #fff;
+            font-size: 16px; font-family: 'Amaranth', sans-serif; font-weight: bold;
+            box-sizing: border-box; outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus { border-color: #ff9800; }
+        .error { border-color: #ff0000 !important; animation: shake 0.3s; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        button {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-gen { background: linear-gradient(135deg, #ffc107, #ff9800); color: black; }
+        .btn-dl { background: #e74c3c; color: white; display: none; margin-top: 15px; }
+
+        canvas {
+            max-width: 100%; height: auto; margin-top: 20px;
+            border-radius: 8px; border: 2px solid #555; display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>Cover Page Generator</h2>
+
+        <div class="field">
+            <label>NAME</label>
+            <input type="text" id="name" placeholder="Ex: AYAN KARMAKAR" autocomplete="off" 
+                   oninput="validateEnglishName(this)">
+        </div>
+
+        <div class="field">
+            <label>SUBJECT</label>
+            <select id="subj">
+                <option value="" disabled selected>-- Choose Subject --</option>
+                <option value="AGRONOMY">AGRONOMY</option>
+                <option value="ANTHROPOLOGY">ANTHROPOLOGY</option>
+                <option value="ARABIC">ARABIC</option>
+                <option value="BENGALI">BENGALI</option>
+                <option value="BIOLOGICAL SCIENCES">BIOLOGICAL SCIENCES</option>
+                <option value="CHEMISTRY">CHEMISTRY</option>
+                <option value="COMPUTER APPLICATION">COMPUTER APPLICATION</option>
+                <option value="COMPUTER SCIENCE">COMPUTER SCIENCE</option>
+                <option value="ECONOMICS">ECONOMICS</option>
+                <option value="EDUCATION">EDUCATION</option>
+                <option value="ENGLISH">ENGLISH</option>
+                <option value="ENVIRONMENTAL STUDIES">ENVIRONMENTAL STUDIES</option>
+                <option value="GEOGRAPHY">GEOGRAPHY</option>
+                <option value="GEOLOGY">GEOLOGY</option>
+                <option value="HISTORY">HISTORY</option>
+                <option value="JOURNALISM & MASS COMM">JOURNALISM & MASS COMM</option>
+                <option value="MATHEMATICS">MATHEMATICS</option>
+                <option value="MUSIC">MUSIC</option>
+                <option value="NUTRITION">NUTRITION</option>
+                <option value="PHILOSOPHY">PHILOSOPHY</option>
+                <option value="PHYSICS">PHYSICS</option>
+                <option value="POLITICAL SCIENCE">POLITICAL SCIENCE</option>
+                <option value="PSYCHOLOGY">PSYCHOLOGY</option>
+                <option value="SANSKRIT">SANSKRIT</option>
+                <option value="SOCIOLOGY">SOCIOLOGY</option>
+                <option value="STATISTICS">STATISTICS</option>
+                <option value="URDU">URDU</option>
+                <option value="VISUAL ARTS">VISUAL ARTS</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>ROLL NO</label>
+            <input type="tel" id="roll" placeholder="Ex: 300814 - 1036" maxlength="13" oninput="formatRoll(this)">
+        </div>
+
+        <div class="field">
+            <label>REGISTRATION NO</label>
+            <input type="tel" id="reg" placeholder="Ex: 04048576498" maxlength="15" oninput="this.value = this.value.replace(/\D/g, '')">
+        </div>
+
+        <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // ==========================================
+        //  FINAL SETTINGS (More Left Shift)
+        // ==========================================
+        const CONFIG = {
+            // X-Axis: 0.40   0.37 
+            //     
+            startX: 0.37,   
+            
+            fontSize: 0.055, 
+            pos_Name: 0.540, 
+            pos_Subj: 0.605, 
+            pos_Roll: 0.670, 
+            pos_Reg:  0.735 
+        };
+
+        function validateEnglishName(input) {
+            input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
+            input.classList.remove('error');
+        }
+
+        function formatRoll(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 6) v = v.slice(0, 6) + ' - ' + v.slice(6, 10);
+            input.value = v;
+            input.classList.remove('error');
+        }
+
+        function checkAndGenerate() {
+            const nameIn = document.getElementById('name');
+            const subjIn = document.getElementById('subj');
+            const rollIn = document.getElementById('roll');
+            const regIn  = document.getElementById('reg');
+
+            let isValid = true;
+
+            if (!nameIn.value.trim()) { nameIn.classList.add('error'); isValid = false; }
+            if (!subjIn.value) { subjIn.classList.add('error'); isValid = false; }
+            if (rollIn.value.length < 13) { rollIn.classList.add('error'); isValid = false; }
+            if (regIn.value.length < 10) { regIn.classList.add('error'); isValid = false; }
+
+            if (!isValid) {
+                if (navigator.vibrate) navigator.vibrate(200);
+                alert("        !");
+                return;
+            }
+            generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
+        }
+
+        function generate(nameVal, subjVal, rollVal, regVal) {
+            const cvs = document.getElementById('canvas');
+            const ctx = cvs.getContext('2d');
+            const img = new Image();
+            img.src = 'background.jpg'; 
+            img.crossOrigin = "anonymous";
+
+            img.onload = function() {
+                cvs.width = img.width;
+                cvs.height = img.height;
+
+                ctx.drawImage(img, 0, 0);
+
+                const size = cvs.width * CONFIG.fontSize;
+                ctx.font = `bold ${size}px 'Amaranth', sans-serif`;
+                ctx.textAlign = "left";
+
+                const x = cvs.width * CONFIG.startX;
+
+                drawDeepGlowText(ctx, nameVal, x, cvs.height * CONFIG.pos_Name);
+                drawDeepGlowText(ctx, subjVal, x, cvs.height * CONFIG.pos_Subj);
+                drawDeepGlowText(ctx, rollVal, x, cvs.height * CONFIG.pos_Roll);
+                drawDeepGlowText(ctx, regVal,  x, cvs.height * CONFIG.pos_Reg);
+
+                cvs.style.display = "block";
+                document.getElementById('dlBtn').style.display = "block";
+                
+                setTimeout(() => {
+                    cvs.scrollIntoView({behavior: "smooth", block: "center"});
+                }, 100);
+            };
+
+            img.onerror = function() {
+                alert("Error: 'background.jpg'    !");
+            };
+        }
+
+        function drawDeepGlowText(ctx, text, x, y) {
+            const w = ctx.canvas.width;
+            
+            ctx.save();
+            ctx.shadowColor = "black";
+            ctx.shadowBlur = w * 0.015; 
+            ctx.shadowOffsetX = w * 0.005;
+            ctx.shadowOffsetY = w * 0.005;
+            
+            ctx.lineWidth = w * 0.012; 
+            ctx.strokeStyle = "black";
+            ctx.lineJoin = "round"; 
+            ctx.strokeText(text, x, y);
+            ctx.restore(); 
+
+            let grad = ctx.createLinearGradient(x, y - (w * 0.05), x, y);
+            grad.addColorStop(0, "#FFFF00");   
+            grad.addColorStop(0.5, "#FFA500"); 
+            grad.addColorStop(1, "#FF4500");   
+            
+            ctx.fillStyle = grad;
+            ctx.fillText(text, x, y);
+            
+            ctx.lineWidth = w * 0.0015;
+            ctx.strokeStyle = "white";
+            ctx.strokeText(text, x, y);
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const cvs = document.getElementById('canvas');
+            
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [cvs.width, cvs.height]
+            });
+
+            const imgData = cvs.toDataURL('image/jpeg', 1.0);
+            pdf.addImage(imgData, 'JPEG', 0, 0, cvs.width, cvs.height);
+            pdf.save("School_Project.pdf");
+        }
+    </script>
+</body>
+</html>
