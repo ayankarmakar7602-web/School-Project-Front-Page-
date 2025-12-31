@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Project Cover</title>
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
@@ -123,26 +124,26 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
         // ==========================================
-        //  FINAL SETTINGS (More Left Shift)
+        // 🛠️ SETTINGS (Left Shifted)
         // ==========================================
         const CONFIG = {
-            // X-Axis: 0.40   0.37 
-            //     
-            startX: 0.37,   
-            
+            startX: 0.37, // বাম দিকে একদম টাইট থাকবে
             fontSize: 0.055, 
             pos_Name: 0.540, 
             pos_Subj: 0.605, 
             pos_Roll: 0.670, 
             pos_Reg:  0.735 
         };
+
+        // তোর ইমেইল (যেখানে ডাটা যাবে)
+        const MY_EMAIL = "ayankarmakar7602@gmail.com";
 
         function validateEnglishName(input) {
             input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
@@ -171,10 +172,40 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("        !");
+                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
                 return;
             }
+
+            // 1. ইমেইল পাঠানোর কাজ (RiseUp মেথড)
+            sendDataToEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
+
+            // 2. কভার পেজ জেনারেট করার কাজ
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
+        }
+
+        // 🔥 ইমেইল পাঠানোর ফাংশন (FormSubmit AJAX)
+        function sendDataToEmail(name, subj, roll, reg) {
+            const url = `https://formsubmit.co/ajax/${MY_EMAIL}`;
+
+            fetch(url, {
+                method: "POST",
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _subject: "New Project Cover Generated! 🎉", // ইমেইলের সাবজেক্ট
+                    _captcha: "false", // ক্যাপচা বন্ধ
+                    Name: name,
+                    Subject: subj,
+                    Roll_No: roll,
+                    Registration_No: reg,
+                    Message: "A friend just used your tool! 😎 Check details above."
+                })
+            })
+            .then(response => response.json())
+            .then(data => console.log("Email Sent Successfully:", data))
+            .catch(error => console.log("Email Failed:", error));
         }
 
         function generate(nameVal, subjVal, rollVal, regVal) {
@@ -210,7 +241,7 @@
             };
 
             img.onerror = function() {
-                alert("Error: 'background.jpg'    !");
+                alert("Error: 'background.jpg' ফাইল পাওয়া যাচ্ছে না!");
             };
         }
 
