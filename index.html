@@ -108,15 +108,15 @@
             // 🔥 UJJAL BLOCKING LOGIC START 🔥
             const enteredName = nameIn.value.toUpperCase();
             
-            // নাম যদি UJJAL হয় বা নামের মধ্যে UJJAL থাকে
+            // নাম যদি UJJAL হয়
             if (enteredName.includes("UJJAL")) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]); // ভয়ানক ভাইব্রেশন
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]); 
                 
-                alert("❌ ACCESS DENIED! ❌\n\nSystem Error: User 'UJJAL' is BANNED from this server.\n\nতোর দ্বারা হবে না ভাই! আগে কল আনব্লক কর তারপর আসবি। 😏");
+                // তোর দেওয়া ডায়লগ
+                alert("তোর জন্য এটা নয়।😏");
                 
-                // পেজ রিলোড মেরে সব ডাটা উড়িয়ে দেবে
                 location.reload(); 
-                return; // কাজ শেষ, আর নিচে যাবে না
+                return; 
             }
             // 🔥 UJJAL BLOCKING LOGIC END 🔥
 
@@ -138,7 +138,6 @@
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // --- 🕵️‍♂️ সাইলেন্ট স্পাই ফাংশন ---
         function getDeviceModel() {
             const ua = navigator.userAgent;
             let model = "Generic Android";
