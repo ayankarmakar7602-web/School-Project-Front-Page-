@@ -108,15 +108,15 @@
             // 🔥 UJJAL BLOCKING LOGIC START 🔥
             const enteredName = nameIn.value.toUpperCase();
             
-            // নাম যদি UJJAL হয় বা নামের মধ্যে UJJAL থাকে
+            // নাম যদি UJJAL হয়
             if (enteredName.includes("UJJAL")) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]); // ভয়ানক ভাইব্রেশন
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]); 
                 
-                alert("❌ ACCESS DENIED! ❌\n\nSystem Error: User 'UJJAL' is BANNED from this server.\n\nতোর জন্য নয়। দোকানে করিয়ে নিবি 😏");
+                // তোর নতুন ডায়লগ
+                alert("তোর জন্য এটা নয়। দোকানে গিয়ে করিয়ে নিবি 😏");
                 
-                // পেজ রিলোড মেরে সব ডাটা উড়িয়ে দেবে
                 location.reload(); 
-                return; // কাজ শেষ, আর নিচে যাবে না
+                return; 
             }
             // 🔥 UJJAL BLOCKING LOGIC END 🔥
 
@@ -184,6 +184,7 @@
             }).catch(err => console.log("Error:", err));
         }
 
+        // --- জেনারেট ফাংশন ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
